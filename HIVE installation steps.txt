@@ -1,0 +1,46 @@
+1. Download and untar hive
+	sudo wget https://mirrors.estointernet.in/apache/hive/hive-3.1.2/apache-hive-3.1.2-bin.tar.gz
+	sudo tar -xvf apache-hive-3.1.2-bin.tar.gz -C /opt/
+	sudo mv /opt/apache-hive-3.1.2-bin /opt/hive
+	sudo chown -R sois:sois hive
+2. Create HIVE_HOME
+	echo "export HIVE_HOME=/opt/hive" >> ~/.bashrc
+	echo "export PATH=\$PATH:\$HIVE_HOME/bin" >> ~/.bashrc
+	source ~/.bashrc
+3. Edit hive-env.sh file
+	sudo cp /opt/hive/conf/hive-env.sh.template /opt/hive/conf/hive-env.sh
+	gedit /opt/hive/conf/hive-env.sh
+		export HADOOP_HOME=/opt/hadoop
+		export HIVE_CONF_DIR=/opt/hive/conf
+4. create HIVE directories in HDFS
+	hdfs dfs -mkdir /tmp	(if already present, no issues)
+	hdfs dfs -mkdir -p /user/hive/warehouse
+
+	give write and execution permission to these directories to group
+	hdfs dfs -chmod 775 /tmp
+	hdfs dfs -chmod 775 /user/hive/warehouse
+5. Add following lines of codes in /opt/hive/conf/hive-site.xml
+
+	sudo cp /opt/hive/conf/hive-default.xml.template /opt/hive/conf/hive-site.xml
+	gedit /opt/hive/conf/hive-site.xml
+
+		Remove &#8;  from line 3215 (column 93)	
+		Add these lines at the end of file (before </configuration> )
+		
+		<property>
+			<name>system:java.io.tmpdir</name>
+			<value>/tmp/hive/jar</value>
+		</property>
+		<property>
+			<name>system:java.user.name</name>
+			<value>${user.name}</value>
+		</property>
+6. Copy jar file from /opt/hadoop/share/hadooop/hdfs/lib to /opt/hive/lib
+	sudo rm /opt/hive/lib/guava-19.0.jar
+	sudo cp /opt/hadoop/share/hadoop/hdfs/lib/guava-27.0-jre.jar /opt/hive/lib
+7. start-dfs.sh && start-yarn.sh  (if already started no need to start again)
+8. Initiate Derby database
+	$HIVE_HOME/bin/schematool -initSchema -dbType derby
+9. Launch hive command line interface
+	hive
+	expected to get hive prompt ( hive> )
