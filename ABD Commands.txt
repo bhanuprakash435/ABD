@@ -1,0 +1,80 @@
+HDFS
+----
+
+hdfs dfs -mkdir /abhish --> creates directory
+hdfs dfs -ls / --> To display files
+------------------------------------
+hdfs dfs -put data.txt /abhish   
+
+or
+--
+
+hdfs dfs -copyFromLocal /home/abhish/test /abhish/input --> To put txt file in particular folder
+-------------------------------------
+hdfs dfs -ls /abhish
+hdfs dfs -cat /abhish/data.txt --> To read data
+cat ~/tmp --> to read from a root directory
+
+sudo cat /etc/mysql/debian.cnf --> To check for default root password
+
+SQL
+---
+sudo mysql
+create database retail;
+source /home/abhish/retaildb.sql
+show databases;
+use retail;
+grant all privileges on *.* to 'username'@'localhost' identified by 'password';
+
+##create table departments(department_id int, department_name varchar(45))
+
+Sqoop
+-----
+sqoop list-databases --connect jdbc:mysql://localhost --username abc--password 123
+sqoop list-tables --connect jdbc:mysql://localhost --username abc --password 123
+sqoop import --connect jdbc:mysql://localhost/retail --username abc --password 123 --table departments --target-dir /testtable
+sqoop eval --query 'SELECT * FROM departments' --connect jdbc:mysql://localhost/retail --username abc --password 123  
+sqoop import --connect jdbc:mysql://localhost/retail --username abc --password 123 --table departments --target-dir /testtable --where 'department_id>3'
+sqoop import-all-tables --connect jdbc:mysql://localhost/retail --username abc --password 123 --table departments --warehouse-dir /testtable
+sqoop export --connect jdbc:mysql://localhost/testdb?useSSl=false --username abc --password 123 --table departments --export-dir /test1 (test1 check from hdfs dfs -ls /)
+sqoop import --connect jdbc:mysql://localhost/testdb?useSSl=false --username abc --password 123 --columns product_id,product_name --table departments --target-dir /products
+
+Hive
+----
+hive> create table categories(
+    category_id int,
+    category_department_id int,
+    category_name varchar(45))
+    row format delimited
+    fields terminated by ','
+    stored as textfile;
+
+hive> load data inpath '/retail-db/categories' into table categories; --> extract table
+hive> load data local inpath '/home/abhish/data.txt' into table categories; --> extract data from local
+
+MapReduce Program Procedure
+---------------------------
+1) Create a Java Project in Eclipse 
+2) Enter a Project name and then select jre to JAVA - 1.8
+3) Next is to Add Libraries by right clicking on the created Java Project -> Java Build Path/Libraries/Add External Jars
+4) Two Jars need to import are:
+	/opt/hadoop/share/hadoop/common -> hadoop-common-3.2.1.jar
+	/opt/hadoop/share/hadoop/mapreduce -> hadoop-mapreduce-client-core-3.2.1.jar
+5) Go to a Created Folder -> src/new and create a new class by giving a class name
+6) Create a two class Mapper and Reducer and call a function
+7) Next is to export Jar and choose the destination folder like /home/abhish/
+8) Create directory with input and ouput directory in hdfs
+	hdfs dfs -mkdir /tmp/input
+	hdfs dfs -put /home/data.txt /tmp/input
+	hdfs dfs -mkdir /tmp/output
+9) Run the Jar File
+	yarn jar /home/abhish/WordCount.jar WordCount /tmp/input/data.txt /tmp/output --> Here WordCount given should contain class name defined
+
+10) Next to check hdfs dfs -ls /tmp/output
+11) Run the command to check the outpt hdfs dfs -cat tmp/output/part-00000
+12) Also can be checked in hdfs localhost directory localhost:9870/
+
+/opt/hadoop/share/hadoop/mapreduce/sources/hadoop-mapreduce-examples-3.2.1-sources --> contains set of examples for reference     
+
+
+                                    
